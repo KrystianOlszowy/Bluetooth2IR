@@ -13,6 +13,7 @@
 
 // własne bliblioteki
 #include <bt2ir_graphics.hpp>
+#include <b2tir_connection.hpp>
 
 // globalne definicje dotyczące sterowania
 int stan{1};
@@ -54,8 +55,7 @@ bool buttonEvent{false};
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
-
-Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+bt2ir::Display display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // globalne definicje dotyczące serwera BLE
 #define SERVICE_UUID "0f761ee5-3da9-40ef-9eb9-702db7e13037"
@@ -114,20 +114,20 @@ class DescriptorCallbacks : public NimBLEDescriptorCallbacks
 static CharacteristicCallbacks characteristicsCallbacks{};
 static DescriptorCallbacks descriptorsCallbacks{};
 
-void drawConnectionEvent(Adafruit_SH1106G &, const int screen_width, const int screen_height, bool deviceConnected)
+void drawConnectionEvent(bt2ir::Display &display, bool deviceConnected)
 {
+  display.clearDisplay();
+
   if (deviceConnected)
   {
-    display.clearDisplay();
-    drawBluetoothConnected(display, SCREEN_WIDTH, SCREEN_HEIGHT, connnectedDevices);
-    display.display();
+    display.drawBluetoothConnected(connnectedDevices);
   }
   else
   {
-    display.clearDisplay();
-    drawBluetoothDisconnected(display, SCREEN_WIDTH, SCREEN_HEIGHT);
-    display.display();
+    display.drawBluetoothDisconnected();
   }
+
+  display.display();
 }
 
 void setup()
@@ -145,7 +145,7 @@ void setup()
   else
   {
     display.clearDisplay();
-    drawBluetoothInitializing(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+    display.drawBluetoothInitializing();
     display.display();
   }
 
@@ -186,7 +186,7 @@ void loop()
 
   if (connectionEvent)
   {
-    drawConnectionEvent(display, SCREEN_WIDTH, SCREEN_HEIGHT, deviceConnected);
+    drawConnectionEvent(display, deviceConnected);
     connectionEvent = false;
   }
 
@@ -213,79 +213,79 @@ void loop()
     case Button::EIGHT:
     case Button::NINE:
       display.clearDisplay();
-      drawDigit(display, SCREEN_WIDTH, SCREEN_HEIGHT, button);
+      display.drawDigit(button);
       display.display();
       buttonEvent = false;
       break;
     case Button::POWER:
       display.clearDisplay();
-      drawPower(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawPower();
       display.display();
       buttonEvent = false;
       break;
     case Button::MUTE:
       display.clearDisplay();
-      drawMute(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawMute();
       display.display();
       buttonEvent = false;
       break;
     case Button::CHANNEL_UP:
       display.clearDisplay();
-      drawChannelUp(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawChannelUp();
       display.display();
       buttonEvent = false;
       break;
     case Button::CHANNEL_DOWN:
       display.clearDisplay();
-      drawChannelDown(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawChannelDown();
       display.display();
       buttonEvent = false;
       break;
     case Button::VOLUME_UP:
       display.clearDisplay();
-      drawVolumeUp(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawVolumeUp();
       display.display();
       buttonEvent = false;
       break;
     case Button::VOLUME_DOWN:
       display.clearDisplay();
-      drawVolumeDown(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawVolumeDown();
       display.display();
       buttonEvent = false;
       break;
     case Button::MENU:
       display.clearDisplay();
-      drawMenu(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawMenu();
       display.display();
       buttonEvent = false;
       break;
     case Button::OKAY:
       display.clearDisplay();
-      drawOK(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawOK();
       display.display();
       buttonEvent = false;
       break;
     case Button::MOVE_UP:
       display.clearDisplay();
-      drawMoveUp(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawMoveUp();
       display.display();
       buttonEvent = false;
       break;
     case Button::MOVE_DOWN:
       display.clearDisplay();
-      drawMoveDown(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawMoveDown();
       display.display();
       buttonEvent = false;
       break;
     case Button::MOVE_LEFT:
       display.clearDisplay();
-      drawMoveLeft(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawMoveLeft();
       display.display();
       buttonEvent = false;
       break;
     case Button::MOVE_RIGHT:
       display.clearDisplay();
-      drawMoveRight(display, SCREEN_WIDTH, SCREEN_HEIGHT);
+      display.drawMoveRight();
       display.display();
       buttonEvent = false;
       break;
@@ -303,7 +303,7 @@ void loop()
 
     if (presentTime - buttonInfoStartTime >= 500UL)
     {
-      drawConnectionEvent(display, SCREEN_WIDTH, SCREEN_HEIGHT, deviceConnected);
+      drawConnectionEvent(display, deviceConnected);
       connectionEvent = false;
       stan = 1;
     }
