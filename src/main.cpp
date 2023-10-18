@@ -1,24 +1,22 @@
 #include <SPI.h>
 #include <Wire.h>
+
 // biblioteki wyświetlacza
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
 
-// biblioteki bluetooth
-#include <nimBLEDevice.h>
-#include <nimBLEUtils.h>
-#include <nimBLEServer.h>
-
 // biblioteki sygnałów podczerwonych
+#include <IRremoteESP8266.h>
+#include <IRrecv.h>
+#include <IRsend.h>
+#include <IRutils.h>
 
 // własne bliblioteki
 #include <bt2ir_graphics.hpp>
-#include <b2tir_connection.hpp>
+#include <bt2ir_connection.hpp>
 
 // globalne definicje dotyczące sterowania
 int stan{1};
-int connnectedDevices{0};
-bool connectionEvent{true};
 
 enum Button
 {
@@ -48,7 +46,6 @@ enum Button
 };
 
 int button{-1};
-bool buttonEvent{false};
 
 // globalne definicje dotyczące ekranu
 #define i2c_Address 0x3c
@@ -57,30 +54,17 @@ bool buttonEvent{false};
 #define OLED_RESET -1
 bt2ir::Display display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// globalne definicje dotyczące serwera BLE
-#define SERVICE_UUID "0f761ee5-3da9-40ef-9eb9-702db7e13037"
-#define CHARACTERISTIC_UUID "c7e55ae3-855b-4d3b-be0e-f5153a8830c4"
-#define DESCRIPTOR_UIID "6055f164-06b7-11ee-be56-0242ac120002"
+// globalne definicje dotyczące transmitera IR
+const uint16_t receiverPin{5};
+IRrecv IRReceiver(receiverPin);
+decode_results results;
+
+const uint16_t senderPin{4};
+IRsend IRSender(senderPin);
 
 static NimBLEServer *serverBLE{};
 
-class ServerCallbacks : public NimBLEServerCallbacks
-{
-  void onConnect(NimBLEServer *serverBLE)
-  {
-    NimBLEDevice::startAdvertising();
-    ++connnectedDevices;
-    connectionEvent = true;
-  };
-
-  void onDisconnect(NimBLEServer *pServer)
-  {
-    NimBLEDevice::startAdvertising();
-    --connnectedDevices;
-    connectionEvent = true;
-  };
-};
-
+/*
 class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
 {
   void onWrite(NimBLECharacteristic *characteristic)
@@ -100,35 +84,7 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
     }
   }
 };
-
-class DescriptorCallbacks : public NimBLEDescriptorCallbacks
-{
-  void onRead(NimBLEDescriptor *descriptor)
-  {
-    Serial.print(descriptor->getUUID().toString().c_str());
-    Serial.print(" Someone is reading this descriptor which has value: ");
-    Serial.println(descriptor->getStringValue().c_str());
-  };
-};
-
-static CharacteristicCallbacks characteristicsCallbacks{};
-static DescriptorCallbacks descriptorsCallbacks{};
-
-void drawConnectionEvent(bt2ir::Display &display, bool deviceConnected)
-{
-  display.clearDisplay();
-
-  if (deviceConnected)
-  {
-    display.drawBluetoothConnected(connnectedDevices);
-  }
-  else
-  {
-    display.drawBluetoothDisconnected();
-  }
-
-  display.display();
-}
+*/
 
 void setup()
 {
@@ -149,52 +105,37 @@ void setup()
     display.display();
   }
 
-  NimBLEDevice::init("Bluetooth2IR for TV");
-
-  serverBLE = NimBLEDevice::createServer();
-  serverBLE->setCallbacks(new ServerCallbacks());
-
-  NimBLEService *serviceBLE{serverBLE->createService(SERVICE_UUID)};
-
-  NimBLECharacteristic *buttonPressedCharacteristic{serviceBLE->createCharacteristic(
-      CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE)};
-
-  buttonPressedCharacteristic->setValue(uint(50));
-  buttonPressedCharacteristic->setCallbacks(&characteristicsCallbacks);
-
-  NimBLEDescriptor *descriptor{buttonPressedCharacteristic->createDescriptor(DESCRIPTOR_UIID, NIMBLE_PROPERTY::READ)};
-
-  descriptor->setValue(std::string("ID of last presssed button on remote controller aplication."));
-  descriptor->setCallbacks(&descriptorsCallbacks);
-
-  serviceBLE->start();
-
-  NimBLEAdvertising *advertising{NimBLEDevice::getAdvertising()};
-  advertising->addServiceUUID(serviceBLE->getUUID());
-  advertising->setScanResponse(true);
-  advertising->start();
-
+  bt2ir::Connection *connection = bt2ir::Connection::getInstance();
+  connection->setupConnection();
   Serial.println("Advertising Started");
+
+  // IR
+  IRReceiver.enableIRIn();
+  IRSender.begin();
+  Serial.println();
+  Serial.println("IRReceiver and IRSender started. Waiting for signals..");
 }
 
-bool deviceConnected{false};
 unsigned long buttonInfoStartTime{0};
 
 void loop()
 {
-  deviceConnected = connnectedDevices > 0;
+  bt2ir::Connection *connection = bt2ir::Connection::getInstance();
 
-  if (connectionEvent)
+  if (connection->isConnectionEvent())
   {
-    drawConnectionEvent(display, deviceConnected);
-    connectionEvent = false;
+    Serial.println("przed rysowaniem");
+    connection->drawServerEvent(display, connection->getConnectedDevices());
+    Serial.println("narysowane");
+    connection->resetConnnectionEvent();
+    Serial.println("zresetowany event");
   }
 
   switch (stan)
   {
   case 1:
   {
-    if (buttonEvent)
+    if (connection->isButtonTypeEvent())
       stan = 2;
     break;
   }
@@ -215,79 +156,81 @@ void loop()
       display.clearDisplay();
       display.drawDigit(button);
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::POWER:
       display.clearDisplay();
       display.drawPower();
       display.display();
-      buttonEvent = false;
+      IRSender.sendNEC(0XFEA857);
+      connection->resetButtonTypeEvent();
       break;
     case Button::MUTE:
       display.clearDisplay();
       display.drawMute();
+      IRSender.sendNEC(0XFE6897);
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::CHANNEL_UP:
       display.clearDisplay();
       display.drawChannelUp();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::CHANNEL_DOWN:
       display.clearDisplay();
       display.drawChannelDown();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::VOLUME_UP:
       display.clearDisplay();
       display.drawVolumeUp();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::VOLUME_DOWN:
       display.clearDisplay();
       display.drawVolumeDown();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::MENU:
       display.clearDisplay();
       display.drawMenu();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::OKAY:
       display.clearDisplay();
       display.drawOK();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::MOVE_UP:
       display.clearDisplay();
       display.drawMoveUp();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::MOVE_DOWN:
       display.clearDisplay();
       display.drawMoveDown();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::MOVE_LEFT:
       display.clearDisplay();
       display.drawMoveLeft();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     case Button::MOVE_RIGHT:
       display.clearDisplay();
       display.drawMoveRight();
       display.display();
-      buttonEvent = false;
+      connection->resetButtonTypeEvent();
       break;
     default:
       Serial.println("Button code error!");
@@ -303,11 +246,18 @@ void loop()
 
     if (presentTime - buttonInfoStartTime >= 500UL)
     {
-      drawConnectionEvent(display, deviceConnected);
-      connectionEvent = false;
+      connection->drawServerEvent(display, connection->getConnectedDevices());
+      connection->resetButtonTypeEvent();
       stan = 1;
     }
     break;
   }
+  }
+  // IR
+  if (IRReceiver.decode(&results))
+  {
+    serialPrintUint64(results.value, HEX);
+    Serial.println();
+    IRReceiver.resume();
   }
 }
