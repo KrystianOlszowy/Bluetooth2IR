@@ -12,7 +12,7 @@ namespace bt2ir
     class Connection
     {
     public:
-        static Connection* getInstance();
+        static Connection *getInstance();
 
         void initConnectedDevices();
         void addDeviceToCounter();
@@ -32,11 +32,13 @@ namespace bt2ir
         bool isButtonIrCodeEvent();
 
         void setupConnection();
+        NimBLECharacteristic *getButtonTypeCharacteristic();
+        NimBLECharacteristic *getButtonSignalCharacteristic();
 
-        void drawServerEvent(bt2ir::Display &display, bool deviceConnected);
+        void drawServerEvent(Display &display, bool deviceConnected);
 
     private:
-        static Connection* connection;
+        static Connection *connection;
         int connectedDevices{};
         bool connectionEvent{};
         bool buttonTypeEvent{};
@@ -45,6 +47,8 @@ namespace bt2ir
         const std::string serverName{"Bluetooth2IR for TV"};
 
         NimBLEServer *serverBt2ir{};
+        NimBLECharacteristic *buttonTypeCharacteristic{};
+        NimBLECharacteristic *buttonSignalCharacteristic{};
 
         const std::string serviceBt2ir_UIID{"0f761ee5-3da9-40ef-9eb9-702db7e13037"};
         const std::string buttonTypeCharacteristic_UUID{"c7e55ae3-855b-4d3b-be0e-f5153a8830c4"};

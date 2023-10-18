@@ -1,10 +1,6 @@
 #include <SPI.h>
 #include <Wire.h>
 
-// biblioteki wyświetlacza
-#include <Adafruit_GFX.h>
-#include <Adafruit_SH110X.h>
-
 // biblioteki sygnałów podczerwonych
 #include <IRremoteESP8266.h>
 #include <IRrecv.h>
@@ -14,45 +10,18 @@
 // własne bliblioteki
 #include <bt2ir_graphics.hpp>
 #include <bt2ir_connection.hpp>
-
-// globalne definicje dotyczące sterowania
-int stan{1};
-
-enum Button
-{
-  ZERO,
-  ONE,
-  TWO,
-  THREE,
-  FOUR,
-  FIVE,
-  SIX,
-  SEVEN,
-  EIGHT,
-  NINE,
-  POWER,
-  MUTE,
-  CHANNEL_UP,
-  CHANNEL_DOWN,
-  VOLUME_UP,
-  VOLUME_DOWN,
-  MENU,
-  OKAY,
-  MOVE_UP,
-  MOVE_DOWN,
-  MOVE_LEFT,
-  MOVE_RIGHT,
-  LIMIT
-};
-
-int button{-1};
+#include <bt2ir_controller.hpp>
 
 // globalne definicje dotyczące ekranu
 #define i2c_Address 0x3c
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
+
+// inicjalizacja obiiektów zarządzających urządzeniem
 bt2ir::Display display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+bt2ir::Connection *connection = bt2ir::Connection::getInstance();
+bt2ir::Controller controller{};
 
 // globalne definicje dotyczące transmitera IR
 const uint16_t receiverPin{5};
@@ -61,30 +30,6 @@ decode_results results;
 
 const uint16_t senderPin{4};
 IRsend IRSender(senderPin);
-
-static NimBLEServer *serverBLE{};
-
-/*
-class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
-{
-  void onWrite(NimBLECharacteristic *characteristic)
-  {
-    Serial.print(characteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(*characteristic->getValue());
-
-    if (*characteristic->getValue() >= Button::ZERO && *characteristic->getValue() < Button::LIMIT)
-    {
-      button = *characteristic->getValue();
-      buttonEvent = true;
-    }
-    else
-    {
-      button = -1;
-    }
-  }
-};
-*/
 
 void setup()
 {
@@ -100,16 +45,16 @@ void setup()
   }
   else
   {
+    // Naprawić
     display.clearDisplay();
     display.drawBluetoothInitializing();
     display.display();
   }
 
-  bt2ir::Connection *connection = bt2ir::Connection::getInstance();
   connection->setupConnection();
   Serial.println("Advertising Started");
 
-  // IR
+  // IR, do zmiany
   IRReceiver.enableIRIn();
   IRSender.begin();
   Serial.println();
@@ -120,139 +65,108 @@ unsigned long buttonInfoStartTime{0};
 
 void loop()
 {
-  bt2ir::Connection *connection = bt2ir::Connection::getInstance();
-
   if (connection->isConnectionEvent())
   {
-    Serial.println("przed rysowaniem");
     connection->drawServerEvent(display, connection->getConnectedDevices());
-    Serial.println("narysowane");
     connection->resetConnnectionEvent();
-    Serial.println("zresetowany event");
   }
 
-  switch (stan)
+  if (connection->isButtonTypeEvent())
   {
-  case 1:
-  {
-    if (connection->isButtonTypeEvent())
-      stan = 2;
-    break;
-  }
-  case 2:
-  {
-    switch (button)
+    controller.updateButtonType();
+    connection->resetButtonTypeEvent();
+    int buttonType = controller.getButtonType();
+
+    switch (buttonType)
     {
-    case Button::ZERO:
-    case Button::ONE:
-    case Button::TWO:
-    case Button::THREE:
-    case Button::FOUR:
-    case Button::FIVE:
-    case Button::SIX:
-    case Button::SEVEN:
-    case Button::EIGHT:
-    case Button::NINE:
+    case bt2ir::ButtonType::ZERO:
+    case bt2ir::ButtonType::ONE:
+    case bt2ir::ButtonType::TWO:
+    case bt2ir::ButtonType::THREE:
+    case bt2ir::ButtonType::FOUR:
+    case bt2ir::ButtonType::FIVE:
+    case bt2ir::ButtonType::SIX:
+    case bt2ir::ButtonType::SEVEN:
+    case bt2ir::ButtonType::EIGHT:
+    case bt2ir::ButtonType::NINE:
       display.clearDisplay();
-      display.drawDigit(button);
+      display.drawDigit(buttonType);
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::POWER:
+    case bt2ir::ButtonType::POWER:
       display.clearDisplay();
       display.drawPower();
       display.display();
       IRSender.sendNEC(0XFEA857);
-      connection->resetButtonTypeEvent();
       break;
-    case Button::MUTE:
+    case bt2ir::ButtonType::MUTE:
       display.clearDisplay();
       display.drawMute();
       IRSender.sendNEC(0XFE6897);
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::CHANNEL_UP:
+    case bt2ir::ButtonType::CHANNEL_UP:
       display.clearDisplay();
       display.drawChannelUp();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::CHANNEL_DOWN:
+    case bt2ir::ButtonType::CHANNEL_DOWN:
       display.clearDisplay();
       display.drawChannelDown();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::VOLUME_UP:
+    case bt2ir::ButtonType::VOLUME_UP:
       display.clearDisplay();
       display.drawVolumeUp();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::VOLUME_DOWN:
+    case bt2ir::ButtonType::VOLUME_DOWN:
       display.clearDisplay();
       display.drawVolumeDown();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::MENU:
+    case bt2ir::ButtonType::MENU:
       display.clearDisplay();
       display.drawMenu();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::OKAY:
+    case bt2ir::ButtonType::OKAY:
       display.clearDisplay();
       display.drawOK();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::MOVE_UP:
+    case bt2ir::ButtonType::MOVE_UP:
       display.clearDisplay();
       display.drawMoveUp();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::MOVE_DOWN:
+    case bt2ir::ButtonType::MOVE_DOWN:
       display.clearDisplay();
       display.drawMoveDown();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::MOVE_LEFT:
+    case bt2ir::ButtonType::MOVE_LEFT:
       display.clearDisplay();
       display.drawMoveLeft();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
-    case Button::MOVE_RIGHT:
+    case bt2ir::ButtonType::MOVE_RIGHT:
       display.clearDisplay();
       display.drawMoveRight();
       display.display();
-      connection->resetButtonTypeEvent();
       break;
     default:
       Serial.println("Button code error!");
       break;
     }
-    stan = 3;
     buttonInfoStartTime = millis();
-    break;
   }
-  case 3:
-  {
-    unsigned long presentTime = millis();
 
-    if (presentTime - buttonInfoStartTime >= 500UL)
-    {
-      connection->drawServerEvent(display, connection->getConnectedDevices());
-      connection->resetButtonTypeEvent();
-      stan = 1;
-    }
-    break;
+  if (millis() - buttonInfoStartTime >= 500UL)
+  {
+    connection->drawServerEvent(display, connection->getConnectedDevices());
   }
-  }
+
   // IR
   if (IRReceiver.decode(&results))
   {

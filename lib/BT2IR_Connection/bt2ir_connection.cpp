@@ -1,9 +1,11 @@
 #include "bt2ir_connection.hpp"
 
-bt2ir::Connection* bt2ir::Connection::connection = nullptr;
+bt2ir::Connection *bt2ir::Connection::connection = nullptr;
 
-bt2ir::Connection* bt2ir::Connection::getInstance() {
-    if (connection == nullptr) {
+bt2ir::Connection *bt2ir::Connection::getInstance()
+{
+    if (connection == nullptr)
+    {
         connection = new bt2ir::Connection();
     }
     return connection;
@@ -85,20 +87,29 @@ void bt2ir::Connection::setupConnection()
 
     NimBLEService *serviceB2tir{serverBt2ir->createService(this->serviceBt2ir_UIID)};
 
-    NimBLECharacteristic *buttonTypeCharacteristic{serviceB2tir->createCharacteristic(
-        this->buttonTypeCharacteristic_UUID, NIMBLE_PROPERTY::WRITE)};
-    buttonTypeCharacteristic->setCallbacks(new ButtonTypeCharacteristicCallbacks);
+    this->buttonTypeCharacteristic = serviceB2tir->createCharacteristic(
+        this->buttonTypeCharacteristic_UUID, NIMBLE_PROPERTY::WRITE);
+    this->buttonTypeCharacteristic->setCallbacks(new ButtonTypeCharacteristicCallbacks);
 
-    NimBLECharacteristic *buttonSignalCharacteristic{serviceB2tir->createCharacteristic(
-        this->irCodeCharacteristic_UUID, NIMBLE_PROPERTY::WRITE)};
-    buttonSignalCharacteristic->setCallbacks(new IrCodeCharacteristicCallbacks);
-
+    this->buttonSignalCharacteristic = serviceB2tir->createCharacteristic(
+        this->irCodeCharacteristic_UUID, NIMBLE_PROPERTY::WRITE);
+    this->buttonSignalCharacteristic->setCallbacks(new IrCodeCharacteristicCallbacks);
     serviceB2tir->start();
 
     NimBLEAdvertising *advertising{NimBLEDevice::getAdvertising()};
     advertising->addServiceUUID(serviceB2tir->getUUID());
     advertising->setScanResponse(true);
     advertising->start();
+}
+
+NimBLECharacteristic* bt2ir::Connection::getButtonTypeCharacteristic()
+{
+    return this->buttonTypeCharacteristic;
+}
+
+NimBLECharacteristic* bt2ir::Connection::getButtonSignalCharacteristic()
+{
+    return this->buttonSignalCharacteristic;
 }
 
 void bt2ir::Connection::drawServerEvent(bt2ir::Display &display, bool deviceConnected)
