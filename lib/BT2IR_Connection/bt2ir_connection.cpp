@@ -114,8 +114,6 @@ NimBLECharacteristic* bt2ir::Connection::getButtonSignalCharacteristic()
 
 void bt2ir::Connection::drawServerEvent(bt2ir::Display &display, bool deviceConnected)
 {
-    display.clearDisplay();
-
     if (deviceConnected)
     {
         display.drawBluetoothConnected(this->connectedDevices);
@@ -124,8 +122,6 @@ void bt2ir::Connection::drawServerEvent(bt2ir::Display &display, bool deviceConn
     {
         display.drawBluetoothDisconnected();
     }
-
-    display.display();
 }
 
 void bt2ir::ServerCallbacks::onConnect(NimBLEServer *serverBLE)

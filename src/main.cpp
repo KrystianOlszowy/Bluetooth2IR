@@ -45,10 +45,7 @@ void setup()
   }
   else
   {
-    // Naprawić
-    display.clearDisplay();
     display.drawBluetoothInitializing();
-    display.display();
   }
 
   connection->setupConnection();
@@ -89,74 +86,48 @@ void loop()
     case bt2ir::ButtonType::SEVEN:
     case bt2ir::ButtonType::EIGHT:
     case bt2ir::ButtonType::NINE:
-      display.clearDisplay();
       display.drawDigit(buttonType);
-      display.display();
       break;
     case bt2ir::ButtonType::POWER:
-      display.clearDisplay();
       display.drawPower();
-      display.display();
       IRSender.sendNEC(0XFEA857);
       break;
     case bt2ir::ButtonType::MUTE:
-      display.clearDisplay();
       display.drawMute();
       IRSender.sendNEC(0XFE6897);
-      display.display();
       break;
     case bt2ir::ButtonType::CHANNEL_UP:
-      display.clearDisplay();
       display.drawChannelUp();
-      display.display();
       break;
     case bt2ir::ButtonType::CHANNEL_DOWN:
-      display.clearDisplay();
       display.drawChannelDown();
-      display.display();
       break;
     case bt2ir::ButtonType::VOLUME_UP:
-      display.clearDisplay();
       display.drawVolumeUp();
-      display.display();
       break;
     case bt2ir::ButtonType::VOLUME_DOWN:
-      display.clearDisplay();
       display.drawVolumeDown();
-      display.display();
       break;
     case bt2ir::ButtonType::MENU:
-      display.clearDisplay();
       display.drawMenu();
-      display.display();
       break;
     case bt2ir::ButtonType::OKAY:
-      display.clearDisplay();
       display.drawOK();
-      display.display();
       break;
     case bt2ir::ButtonType::MOVE_UP:
-      display.clearDisplay();
       display.drawMoveUp();
-      display.display();
       break;
     case bt2ir::ButtonType::MOVE_DOWN:
-      display.clearDisplay();
       display.drawMoveDown();
-      display.display();
       break;
     case bt2ir::ButtonType::MOVE_LEFT:
-      display.clearDisplay();
       display.drawMoveLeft();
-      display.display();
       break;
     case bt2ir::ButtonType::MOVE_RIGHT:
-      display.clearDisplay();
       display.drawMoveRight();
-      display.display();
       break;
     default:
-      Serial.println("Button code error!");
+      Serial.println("Wrong ButtonType value!");
       break;
     }
     buttonInfoStartTime = millis();

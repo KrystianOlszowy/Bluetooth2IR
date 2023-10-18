@@ -6,112 +6,142 @@
 // rysowanie ikony przycisku przejścia w górę i jego opisu
 void bt2ir::Display::drawMoveUp()
 {
+    this->clearDisplay();
     const std::string description_text{"Move Up"};
     drawIconWithDescription(moveUp_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku przejścia w dół i jego opisu
 void bt2ir::Display::drawMoveDown()
 {
+    this->clearDisplay();
     const std::string description_text{"Move Down"};
     drawIconWithDescription(moveDown_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku przejścia w prawo i jego opisu
 void bt2ir::Display::drawMoveRight()
 {
+    this->clearDisplay();
     const std::string description_text{"Move Right"};
     drawIconWithDescription(moveRight_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku przejścia w lewo i jego opisu
 void bt2ir::Display::drawMoveLeft()
 {
+    this->clearDisplay();
     const std::string description_text{"Move Left"};
     drawIconWithDescription(moveLeft_icon, description_text);
+    this->display();
 }
-
 
 // rysowanie ikony przycisku włączenia/wyłączenia i jego opisu
 void bt2ir::Display::drawPower()
 {
+    this->clearDisplay();
     const std::string description_text{"Power"};
     drawIconWithDescription(power_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku potwierdzenia i jego opisu
 void bt2ir::Display::drawOK()
 {
+    this->clearDisplay();
     const std::string description_text{"OK"};
     drawIconWithDescription(OK_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku menu i jego opisu
 void bt2ir::Display::drawMenu()
 {
+    this->clearDisplay();
     const std::string description_text{"Menu"};
     drawIconWithDescription(menu_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku wyciszenia i jego opisu
 void bt2ir::Display::drawMute()
 {
+    this->clearDisplay();
     const std::string description_text{"Mute"};
     drawIconWithDescription(mute_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku podgłoszenia i jego opisu
 void bt2ir::Display::drawVolumeDown()
 {
+    this->clearDisplay();
     const std::string description_text{"Volume Down"};
     drawIconWithDescription(volumeDown_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku przyciszenia i jego opisu
 void bt2ir::Display::drawVolumeUp()
 {
+    this->clearDisplay();
     const std::string description_text{"Volume Up"};
     drawIconWithDescription(volumeUp_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku kanału niżej i jego opisu
 void bt2ir::Display::drawChannelDown()
 {
+    this->clearDisplay();
     const std::string description_text{"Channel Down"};
     drawIconWithDescription(channelDown_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku kanału wyżej i jego opisu
 void bt2ir::Display::drawChannelUp()
 {
+    this->clearDisplay();
     const std::string description_text{"Channel Up"};
     drawIconWithDescription(channelUp_icon, description_text);
+    this->display();
 }
 
 // rysowanie stanu rozłączenia wszystkich urządzeń bluetooth
 void bt2ir::Display::drawBluetoothDisconnected()
 {
+    this->clearDisplay();
     const std::string description_text{"No devices connected!"};
     drawIconWithDescription(bluetoothDisconnected_icon, description_text);
+    this->display();
 }
 
 // rysowanie stanu połączenia określonej liczby urządzeń bluetooth
 void bt2ir::Display::drawBluetoothConnected(const int connectedDevices)
 {
+    this->clearDisplay();
     const std::string description_text{"Connected devices:" + std::to_string(connectedDevices)};
     drawIconWithDescription(bluetoothConnected_icon, description_text);
+    this->display();
 }
 
 // rysowanie stanu rozłączenia z urządzeniem bluetooth
 void bt2ir::Display::drawBluetoothInitializing()
 {
+    this->clearDisplay();
     const std::string description_text{"Initializing..."};
     drawIconWithDescription(bluetoothInitializing_icon, description_text);
+    this->display();
 }
 
 // rysowanie ikony przycisku cyfry 1 i jego opisu
 void bt2ir::Display::drawDigit(int digitToPrint)
 {
+    this->clearDisplay();
     std::string description_text{"Error"};
     std::array<const std::string, 10> description_texts = {"Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"};
 
@@ -125,8 +155,9 @@ void bt2ir::Display::drawDigit(int digitToPrint)
     }
 
     drawBigDigitWithDescription(digitToPrint, description_text);
-}
 
+    this->display();
+}
 
 // rysowanie wyrównanego tekstu na wyświetlaczu
 void bt2ir::Display::drawCenteredString(const std::string &text, const int field_width, const int start_x, const int field_height, const int start_y)
