@@ -33,7 +33,7 @@ namespace bt2ir
 
         void setupConnection();
         NimBLECharacteristic *getButtonTypeCharacteristic();
-        NimBLECharacteristic *getButtonSignalCharacteristic();
+        NimBLECharacteristic *getButtonIrCodeCharacteristic();
 
         void drawServerEvent(Display &display, bool deviceConnected);
 
@@ -48,7 +48,7 @@ namespace bt2ir
 
         NimBLEServer *serverBt2ir{};
         NimBLECharacteristic *buttonTypeCharacteristic{};
-        NimBLECharacteristic *buttonSignalCharacteristic{};
+        NimBLECharacteristic *buttonIrCodeCharacteristic{};
 
         const std::string serviceBt2ir_UIID{"0f761ee5-3da9-40ef-9eb9-702db7e13037"};
         const std::string buttonTypeCharacteristic_UUID{"c7e55ae3-855b-4d3b-be0e-f5153a8830c4"};

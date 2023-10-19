@@ -18,7 +18,7 @@
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 
-// inicjalizacja obiiektów zarządzających urządzeniem
+// inicjalizacja obiektów zarządzających urządzeniem
 bt2ir::Display display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 bt2ir::Connection *connection = bt2ir::Connection::getInstance();
 bt2ir::Controller controller{};
@@ -34,8 +34,6 @@ IRsend IRSender(senderPin);
 void setup()
 {
   Serial.begin(115200);
-
-  // odczekanie czasu do zapalenia się diod ekranu
   delay(250);
 
   if (!display.begin(i2c_Address, true))
@@ -141,8 +139,16 @@ void loop()
   // IR
   if (IRReceiver.decode(&results))
   {
+    Serial.println("\n Odebrany kod IR: ");
     serialPrintUint64(results.value, HEX);
     Serial.println();
     IRReceiver.resume();
+  }
+
+  if (connection->isButtonIrCodeEvent())
+  {
+    controller.updateButtonIrCode();
+    connection->resetButtonIrCodeEvent();
+    IRSender.sendNEC(controller.getButtonIrCode());
   }
 }

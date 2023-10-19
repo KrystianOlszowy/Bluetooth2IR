@@ -91,9 +91,9 @@ void bt2ir::Connection::setupConnection()
         this->buttonTypeCharacteristic_UUID, NIMBLE_PROPERTY::WRITE);
     this->buttonTypeCharacteristic->setCallbacks(new ButtonTypeCharacteristicCallbacks);
 
-    this->buttonSignalCharacteristic = serviceB2tir->createCharacteristic(
+    this->buttonIrCodeCharacteristic = serviceB2tir->createCharacteristic(
         this->irCodeCharacteristic_UUID, NIMBLE_PROPERTY::WRITE);
-    this->buttonSignalCharacteristic->setCallbacks(new IrCodeCharacteristicCallbacks);
+    this->buttonIrCodeCharacteristic->setCallbacks(new IrCodeCharacteristicCallbacks);
     serviceB2tir->start();
 
     NimBLEAdvertising *advertising{NimBLEDevice::getAdvertising()};
@@ -107,9 +107,9 @@ NimBLECharacteristic* bt2ir::Connection::getButtonTypeCharacteristic()
     return this->buttonTypeCharacteristic;
 }
 
-NimBLECharacteristic* bt2ir::Connection::getButtonSignalCharacteristic()
+NimBLECharacteristic* bt2ir::Connection::getButtonIrCodeCharacteristic()
 {
-    return this->buttonSignalCharacteristic;
+    return this->buttonIrCodeCharacteristic;
 }
 
 void bt2ir::Connection::drawServerEvent(bt2ir::Display &display, bool deviceConnected)

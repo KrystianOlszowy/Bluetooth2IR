@@ -37,10 +37,13 @@ namespace bt2ir
     public:
         Controller();
         void updateButtonType();
+        void updateButtonIrCode();
         uint8_t getButtonType();
+        uint64_t getButtonIrCode();
 
     private:
         uint8_t buttonType = bt2ir::ButtonType::LIMIT;
+        uint32_t buttonIrCode{};
         Connection *connection{};
     };    
 }
