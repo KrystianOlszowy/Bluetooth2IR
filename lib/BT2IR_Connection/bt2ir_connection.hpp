@@ -14,6 +14,8 @@ namespace bt2ir
     public:
         static Connection *getInstance();
 
+        void setupConnection();
+
         void initConnectedDevices();
         void addDeviceToCounter();
         void removeDeviceFromCounter();
@@ -31,7 +33,6 @@ namespace bt2ir
         void resetButtonIrCodeEvent();
         bool isButtonIrCodeEvent();
 
-        void setupConnection();
         NimBLECharacteristic *getButtonTypeCharacteristic();
         NimBLECharacteristic *getButtonIrCodeCharacteristic();
 

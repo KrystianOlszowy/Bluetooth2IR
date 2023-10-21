@@ -2,6 +2,28 @@
 
 #include <array>
 #include <Fonts/FreeSans24pt7b.h>
+#include <IRutils.h>
+#include <sstream>
+
+// wypisanie odebranego kodu IR w postaci hexadecymalnej
+void bt2ir::Display::drawReceivedIrCode(uint64_t irCode)
+{
+    this->clearDisplay();
+
+    int left_side = 0;
+    int prompt_Y_offset = 16;
+    const std::string prompt_message = "Received IR code:";
+    this->setTextSize(1);
+    this->drawCenteredString(prompt_message, this->WIDTH, left_side, this->HEIGHT / 2, prompt_Y_offset);
+
+    int ir_code_info_Y_offset = 32;
+    this->setTextSize(2);
+    std::ostringstream ir_code_hex;
+    ir_code_hex << std::hex << std::uppercase << irCode;
+    this->drawCenteredString("0x" + ir_code_hex.str(), this->WIDTH, left_side, this->HEIGHT - ir_code_info_Y_offset, ir_code_info_Y_offset);
+
+    this->display();
+}
 
 // rysowanie ikony przycisku przejścia w górę i jego opisu
 void bt2ir::Display::drawMoveUp()

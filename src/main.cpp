@@ -1,11 +1,7 @@
-#include <SPI.h>
-#include <Wire.h>
-
 // biblioteki sygnałów podczerwonych
 #include <IRremoteESP8266.h>
 #include <IRrecv.h>
 #include <IRsend.h>
-#include <IRutils.h>
 
 // własne bliblioteki
 #include <bt2ir_graphics.hpp>
@@ -26,8 +22,9 @@ bt2ir::Controller controller{};
 // globalne definicje dotyczące transmitera IR
 const uint16_t receiverPin{5};
 IRrecv IRReceiver(receiverPin);
-decode_results results;
+decode_results receivedIrCode{};
 
+// globalne definicje dotyczące odbiornika IR
 const uint16_t senderPin{4};
 IRsend IRSender(senderPin);
 
@@ -46,17 +43,18 @@ void setup()
     display.drawBluetoothInitializing();
   }
 
+  // inicjalizacja serwera BLE
   connection->setupConnection();
   Serial.println("Advertising Started");
 
-  // IR, do zmiany
+  // inicjalizacja odbierania i wysyłania kodów IR
   IRReceiver.enableIRIn();
   IRSender.begin();
-  Serial.println();
-  Serial.println("IRReceiver and IRSender started. Waiting for signals..");
+  Serial.println("\n IRReceiver and IRSender started. Waiting for signals..");
 }
 
-unsigned long buttonInfoStartTime{0};
+unsigned long drawButtonTimestamp{0};
+unsigned long drawIrTimestamp{0};
 
 void loop()
 {
@@ -128,21 +126,7 @@ void loop()
       Serial.println("Wrong ButtonType value!");
       break;
     }
-    buttonInfoStartTime = millis();
-  }
-
-  if (millis() - buttonInfoStartTime >= 500UL)
-  {
-    connection->drawServerEvent(display, connection->getConnectedDevices());
-  }
-
-  // IR
-  if (IRReceiver.decode(&results))
-  {
-    Serial.println("\n Odebrany kod IR: ");
-    serialPrintUint64(results.value, HEX);
-    Serial.println();
-    IRReceiver.resume();
+    drawButtonTimestamp = millis();
   }
 
   if (connection->isButtonIrCodeEvent())
@@ -150,5 +134,19 @@ void loop()
     controller.updateButtonIrCode();
     connection->resetButtonIrCodeEvent();
     IRSender.sendNEC(controller.getButtonIrCode());
+  }
+
+  if (IRReceiver.decode(&receivedIrCode))
+  {
+    display.drawReceivedIrCode(receivedIrCode.value);
+    drawIrTimestamp = millis();
+    IRReceiver.resume();
+  }
+
+  if ((millis() - drawButtonTimestamp >= 500UL && drawButtonTimestamp != 0) || (millis() - drawIrTimestamp >= 7000UL && drawIrTimestamp != 0))
+  {
+    connection->drawServerEvent(display, connection->getConnectedDevices());
+    drawButtonTimestamp = 0;
+    drawIrTimestamp = 0;
   }
 }

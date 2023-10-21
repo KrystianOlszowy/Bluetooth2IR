@@ -141,11 +141,9 @@ void bt2ir::ServerCallbacks::onDisconnect(NimBLEServer *serverBLE)
 void bt2ir::ButtonTypeCharacteristicCallbacks::onWrite(NimBLECharacteristic *characteristic)
 {
     bt2ir::Connection::getInstance()->setButtonTypeEvent();
-    Serial.print("On write BUTTON!");
 }
 
 void bt2ir::IrCodeCharacteristicCallbacks::onWrite(NimBLECharacteristic *characteristic)
 {
     bt2ir::Connection::getInstance()->setButtonIrCodeEvent();
-    Serial.print("On write IR!");
 }
