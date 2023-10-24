@@ -41,7 +41,7 @@ namespace bt2ir
     private:
         static Connection *connection;
         int connectedDevices{};
-        bool connectionEvent{};
+        bool connectionEvent{true};
         bool buttonTypeEvent{};
         bool buttonIrCodeEvent{};
 

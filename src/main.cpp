@@ -86,11 +86,9 @@ void loop()
       break;
     case bt2ir::ButtonType::POWER:
       display.drawPower();
-      IRSender.sendNEC(0XFEA857);
       break;
     case bt2ir::ButtonType::MUTE:
       display.drawMute();
-      IRSender.sendNEC(0XFE6897);
       break;
     case bt2ir::ButtonType::CHANNEL_UP:
       display.drawChannelUp();

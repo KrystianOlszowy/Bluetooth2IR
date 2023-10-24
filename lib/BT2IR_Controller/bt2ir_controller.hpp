@@ -43,7 +43,7 @@ namespace bt2ir
 
     private:
         uint8_t buttonType = bt2ir::ButtonType::LIMIT;
-        uint32_t buttonIrCode{};
+        uint64_t buttonIrCode{};
         Connection *connection{};
     };    
 }

@@ -36,5 +36,5 @@ void bt2ir::Controller::updateButtonIrCode()
 {
     NimBLECharacteristic *characteristic = connection->getButtonIrCodeCharacteristic();
 
-    this->buttonIrCode = characteristic->getValue<uint32_t>();
+    this->buttonIrCode = characteristic->getValue<uint64_t>();
 }
