@@ -197,8 +197,7 @@ void bt2ir::Display::drawBigDigit(const int digit, const int field_width, const 
 {
     int16_t x1, y1;                   // nieużywane zmienne, tylko aby zadowolić wywołanie funkcji
     uint16_t text_width, text_height; // długość i wysokość tesktu
-
-    // display.setTextSize(4);
+    
     this->setFont(&FreeSans24pt7b);
     this->getTextBounds(std::to_string(digit).c_str(), 0, 0, &x1, &y1, &text_width, &text_height);
 
@@ -215,6 +214,7 @@ void bt2ir::Display::drawBigDigitWithDescription(const int digit, const std::str
     constexpr int digit_y_offset = 8;
     constexpr int digit_height = 32;
 
+    this->setTextSize(1);
     this->setTextColor(SH110X_WHITE);
     drawBigDigit(digit, this->WIDTH, 0, digit_y_offset);
 

@@ -28,7 +28,6 @@ namespace bt2ir
         MOVE_DOWN,
         MOVE_LEFT,
         MOVE_RIGHT,
-        CHANGE_MODE,
         LIMIT
     };
 

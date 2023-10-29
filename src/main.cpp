@@ -125,6 +125,7 @@ void loop()
       break;
     }
     drawButtonTimestamp = millis();
+    drawIrTimestamp = 0;
   }
 
   if (connection->isButtonIrCodeEvent())
@@ -138,6 +139,7 @@ void loop()
   {
     display.drawReceivedIrCode(receivedIrCode.value);
     drawIrTimestamp = millis();
+    drawButtonTimestamp = 0;
     IRReceiver.resume();
   }
 
