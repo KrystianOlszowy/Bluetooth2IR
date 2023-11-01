@@ -4,9 +4,9 @@
 #include <IRsend.h>
 
 // własne bliblioteki
-#include <bt2ir_graphics.hpp>
-#include <bt2ir_connection.hpp>
-#include <bt2ir_controller.hpp>
+#include "bt2ir_graphics.hpp"
+#include "bt2ir_connection.hpp"
+#include "bt2ir_controller.hpp"
 
 // globalne definicje dotyczące ekranu
 #define i2c_Address 0x3c

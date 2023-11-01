@@ -1,7 +1,5 @@
 #include "bt2ir_controller.hpp"
 
-#include <IRutils.h>
-
 bt2ir::Controller::Controller()
 {
     this->connection = bt2ir::Connection::getInstance();

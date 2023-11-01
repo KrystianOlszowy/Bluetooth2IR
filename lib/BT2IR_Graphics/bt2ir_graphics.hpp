@@ -2,7 +2,6 @@
 
 // biblioteki standardowe C++
 #include <iostream>
-#include <memory>
 
 // biblioteki Arduino
 #include <SPI.h>
@@ -17,6 +16,7 @@ namespace bt2ir
     class Display : public Adafruit_SH1106G
     {
     public:
+        // kontruktor inicjujący elementy dziedziczone z klasy Adafruit_SH1106G
         Display(const uint16_t width, const uint16_t height, TwoWire *twoWire, const int8_t resetPin = -1) : Adafruit_SH1106G{width, height, twoWire, resetPin}
         {
         }
